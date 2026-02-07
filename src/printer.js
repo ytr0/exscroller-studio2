@@ -1,45 +1,21 @@
 /**
  * PrinterConnection - ExScroller SDK integration
- * Version: 0.2.1.2026.0207
+ * Version: 0.2.2.2026.0207
  */
 
+import { Printer, Game, PGP, BTN, FEED_MODE } from './sdk.js';
+
 // Singleton state
-let SDK = null;
 let printer = null;
 let connected = false;
 
 /**
- * Get ExScroller SDK (loaded via index.html)
- */
-export async function loadSDK() {
-  if (SDK) return SDK;
-
-  // Wait for SDK to be loaded globally
-  const maxWait = 5000;
-  const start = Date.now();
-
-  while (!window.ExScrollerSDK && Date.now() - start < maxWait) {
-    await new Promise(r => setTimeout(r, 100));
-  }
-
-  if (!window.ExScrollerSDK) {
-    throw new Error('ExScroller SDK not loaded. Check network connection.');
-  }
-
-  SDK = window.ExScrollerSDK;
-  console.log('[Printer] SDK ready:', Object.keys(SDK));
-  return SDK;
-}
-
-/**
  * Connect to printer via Web Serial
  */
-export async function connect(options = {}) {
-  const sdk = await loadSDK();
-
+export async function connect(baudRate = 921600) {
   try {
-    printer = new sdk.Printer();
-    await printer.connect(options.baudRate || 921600);
+    printer = new Printer();
+    await printer.connect(baudRate);
     connected = true;
     console.log('[Printer] Connected');
     return true;
@@ -77,13 +53,6 @@ export function getPrinter() {
 }
 
 /**
- * Get SDK
- */
-export function getSDK() {
-  return SDK;
-}
-
-/**
  * Compile model to Game and send to printer
  */
 export async function printModel(model) {
@@ -91,8 +60,7 @@ export async function printModel(model) {
     throw new Error('Not connected to printer');
   }
 
-  const sdk = await loadSDK();
-  const game = compileModel(model, sdk);
+  const game = compileModel(model);
 
   console.log('[Printer] Compiling and sending...');
   const frames = game.compile();
@@ -103,9 +71,7 @@ export async function printModel(model) {
 /**
  * Compile model to SDK Game instance
  */
-export function compileModel(model, sdk) {
-  const { Game, BTN, FEED_MODE } = sdk;
-
+export function compileModel(model) {
   const game = new Game({ title: model.title });
 
   // Define sprites
@@ -125,7 +91,7 @@ export function compileModel(model, sdk) {
 
     // Add objects
     sectionDef.objects.forEach(obj => {
-      addObjectToSection(section, obj, sdk);
+      addObjectToSection(section, obj);
     });
 
     // Default feed at end
@@ -143,7 +109,7 @@ export function compileModel(model, sdk) {
 /**
  * Add object to section
  */
-function addObjectToSection(section, obj, sdk) {
+function addObjectToSection(section, obj) {
   switch (obj.type) {
     case 'text':
       section.text(Math.round(obj.x), obj.text, {
@@ -184,14 +150,13 @@ function addObjectToSection(section, obj, sdk) {
 }
 
 /**
- * Draw circle using Bresenham algorithm and add as raw lines
+ * Draw circle and add as raw lines
  */
 function addCircleAsRawLines(section, obj) {
   const cx = Math.round(obj.x);
   const cy = Math.round(obj.y);
   const r = Math.round(obj.radius);
 
-  // Create bitmap for circle
   const height = r * 2 + 2;
 
   for (let y = 0; y < height; y++) {
@@ -199,7 +164,6 @@ function addCircleAsRawLines(section, obj) {
     const relY = y - r;
 
     if (obj.fill) {
-      // Filled circle: horizontal spans
       const dx = Math.sqrt(Math.max(0, r * r - relY * relY));
       const x1 = Math.max(0, Math.round(cx - dx));
       const x2 = Math.min(575, Math.round(cx + dx));
@@ -208,7 +172,6 @@ function addCircleAsRawLines(section, obj) {
         line[x >> 3] |= (0x80 >> (x & 7));
       }
     } else {
-      // Outline: just edge pixels
       const dx = Math.sqrt(Math.max(0, r * r - relY * relY));
       const x1 = Math.round(cx - dx);
       const x2 = Math.round(cx + dx);
@@ -217,13 +180,12 @@ function addCircleAsRawLines(section, obj) {
       if (x2 >= 0 && x2 < 576 && x2 !== x1) line[x2 >> 3] |= (0x80 >> (x2 & 7));
     }
 
-    // Use rawLine method from SDK
     section.rawLine(line);
   }
 }
 
 /**
- * Draw line using Bresenham and add as raw lines
+ * Draw line and add as raw lines
  */
 function addLineAsRawLines(section, obj) {
   const [x1, y1, x2, y2] = obj.points;
@@ -231,7 +193,6 @@ function addLineAsRawLines(section, obj) {
 
   for (let y = 0; y < height; y++) {
     const line = new Uint8Array(72);
-    // Simple line rasterization
     const t = height > 1 ? y / (height - 1) : 0;
     const x = Math.round(x1 + t * (x2 - x1));
 
@@ -251,15 +212,14 @@ function pxToMm(px) {
 }
 
 /**
- * Send test print (for debugging)
+ * Send test print
  */
 export async function testPrint() {
   if (!isConnected()) {
     throw new Error('Not connected to printer');
   }
 
-  const sdk = await loadSDK();
-  const game = new sdk.Game({ title: 'Test Print' });
+  const game = new Game({ title: 'Test Print' });
 
   game.section('test')
     .text(0, '=== ExScroller Studio 2 ===')
@@ -289,3 +249,6 @@ export async function setHeat(heatUs) {
   if (!isConnected()) return;
   await printer.setHeat(heatUs);
 }
+
+// Re-export SDK classes for convenience
+export { Game, PGP, BTN, FEED_MODE };

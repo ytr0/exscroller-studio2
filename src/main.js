@@ -1,6 +1,6 @@
 /**
  * ExScroller Game Studio 2
- * Version: 0.2.0.2026.0207
+ * Version: 0.2.2.2026.0207
  * Visual + Code dual-mode editor for thermal printer games
  */
 
@@ -276,13 +276,6 @@ function initConnection() {
   const btnPrint = document.getElementById('btnPrint');
   const btnTest = document.getElementById('btnTest');
   const statusEl = document.getElementById('status');
-
-  // Load SDK on startup (preload)
-  PrinterConnection.loadSDK().then(() => {
-    console.log('[Studio] SDK preloaded');
-  }).catch(err => {
-    console.warn('[Studio] SDK preload failed:', err);
-  });
 
   // Connect button
   btnConnect.addEventListener('click', async () => {
