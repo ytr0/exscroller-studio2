@@ -13,8 +13,9 @@
       <h1>ExScroller Studio 2</h1>
       <div class="header-actions">
         <button id="btnConnect">Connect</button>
-        <button id="btnPrint">Print</button>
-        <span id="status">Not connected</span>
+        <button id="btnTest" disabled>Test</button>
+        <button id="btnPrint" disabled>Print</button>
+        <span id="status" class="status">Not connected</span>
       </div>
     </header>
 
@@ -68,6 +69,20 @@
         <h3>Preview</h3>
         <div id="previewContainer">
           <canvas id="previewCanvas" width="576" height="200"></canvas>
+        </div>
+
+        <h3>Printer</h3>
+        <div id="printerPanel" class="printer-panel">
+          <div class="control-row">
+            <label>Speed</label>
+            <input type="range" id="speedSlider" min="1000" max="15000" value="8000" step="500">
+            <span id="speedValue">8000</span> pps
+          </div>
+          <div class="control-row">
+            <label>Heat</label>
+            <input type="range" id="heatSlider" min="100" max="1500" value="500" step="50">
+            <span id="heatValue">500</span> μs
+          </div>
         </div>
       </aside>
     </main>

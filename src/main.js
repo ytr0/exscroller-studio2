@@ -1,6 +1,6 @@
 /**
  * ExScroller Game Studio 2
- * Version: 0.1.0.2026.0207
+ * Version: 0.2.0.2026.0207
  * Visual + Code dual-mode editor for thermal printer games
  */
 
@@ -9,6 +9,7 @@ import { SceneModel } from './model.js';
 import { VisualEditor } from './visual-editor.js';
 import { CodeGenerator } from './code-generator.js';
 import { PreviewRenderer } from './preview.js';
+import * as PrinterConnection from './printer.js';
 
 // =====================================================
 // App State
@@ -268,16 +269,145 @@ function updatePreview() {
 }
 
 // =====================================================
-// Connection (Placeholder)
+// Printer Connection
 // =====================================================
 function initConnection() {
-  document.getElementById('btnConnect').addEventListener('click', async () => {
-    // TODO: Integrate with exscroller.js Printer class
-    alert('Connection feature coming soon');
+  const btnConnect = document.getElementById('btnConnect');
+  const btnPrint = document.getElementById('btnPrint');
+  const btnTest = document.getElementById('btnTest');
+  const statusEl = document.getElementById('status');
+
+  // Load SDK on startup (preload)
+  PrinterConnection.loadSDK().then(() => {
+    console.log('[Studio] SDK preloaded');
+  }).catch(err => {
+    console.warn('[Studio] SDK preload failed:', err);
   });
 
-  document.getElementById('btnPrint').addEventListener('click', async () => {
-    // TODO: Compile and print
-    alert('Print feature coming soon');
+  // Connect button
+  btnConnect.addEventListener('click', async () => {
+    if (PrinterConnection.isConnected()) {
+      // Disconnect
+      try {
+        await PrinterConnection.disconnect();
+        updateConnectionUI(false);
+      } catch (err) {
+        console.error('Disconnect error:', err);
+      }
+    } else {
+      // Connect
+      try {
+        btnConnect.disabled = true;
+        statusEl.textContent = 'Connecting...';
+        statusEl.className = 'status connecting';
+
+        await PrinterConnection.connect();
+        updateConnectionUI(true);
+      } catch (err) {
+        console.error('Connect error:', err);
+        statusEl.textContent = err.message || 'Connection failed';
+        statusEl.className = 'status error';
+      } finally {
+        btnConnect.disabled = false;
+      }
+    }
   });
+
+  // Print button
+  btnPrint.addEventListener('click', async () => {
+    if (!PrinterConnection.isConnected()) {
+      alert('Please connect to printer first');
+      return;
+    }
+
+    try {
+      btnPrint.disabled = true;
+      btnPrint.textContent = 'Printing...';
+
+      await PrinterConnection.printModel(state.model);
+
+      btnPrint.textContent = 'Print';
+    } catch (err) {
+      console.error('Print error:', err);
+      alert('Print failed: ' + err.message);
+    } finally {
+      btnPrint.disabled = false;
+      btnPrint.textContent = 'Print';
+    }
+  });
+
+  // Test button
+  if (btnTest) {
+    btnTest.addEventListener('click', async () => {
+      if (!PrinterConnection.isConnected()) {
+        alert('Please connect to printer first');
+        return;
+      }
+
+      try {
+        btnTest.disabled = true;
+        await PrinterConnection.testPrint();
+      } catch (err) {
+        console.error('Test print error:', err);
+        alert('Test print failed: ' + err.message);
+      } finally {
+        btnTest.disabled = false;
+      }
+    });
+  }
+
+  // Speed slider
+  const speedSlider = document.getElementById('speedSlider');
+  const speedValue = document.getElementById('speedValue');
+  if (speedSlider) {
+    speedSlider.addEventListener('input', () => {
+      const pps = parseInt(speedSlider.value);
+      speedValue.textContent = pps;
+    });
+    speedSlider.addEventListener('change', async () => {
+      const pps = parseInt(speedSlider.value);
+      if (PrinterConnection.isConnected()) {
+        await PrinterConnection.setSpeed(pps);
+      }
+    });
+  }
+
+  // Heat slider
+  const heatSlider = document.getElementById('heatSlider');
+  const heatValue = document.getElementById('heatValue');
+  if (heatSlider) {
+    heatSlider.addEventListener('input', () => {
+      const us = parseInt(heatSlider.value);
+      heatValue.textContent = us;
+    });
+    heatSlider.addEventListener('change', async () => {
+      const us = parseInt(heatSlider.value);
+      if (PrinterConnection.isConnected()) {
+        await PrinterConnection.setHeat(us);
+      }
+    });
+  }
+}
+
+function updateConnectionUI(connected) {
+  const btnConnect = document.getElementById('btnConnect');
+  const btnPrint = document.getElementById('btnPrint');
+  const btnTest = document.getElementById('btnTest');
+  const statusEl = document.getElementById('status');
+
+  if (connected) {
+    btnConnect.textContent = 'Disconnect';
+    btnConnect.classList.add('connected');
+    btnPrint.disabled = false;
+    if (btnTest) btnTest.disabled = false;
+    statusEl.textContent = 'Connected';
+    statusEl.className = 'status connected';
+  } else {
+    btnConnect.textContent = 'Connect';
+    btnConnect.classList.remove('connected');
+    btnPrint.disabled = true;
+    if (btnTest) btnTest.disabled = true;
+    statusEl.textContent = 'Not connected';
+    statusEl.className = 'status';
+  }
 }
