@@ -106,4 +106,4 @@ exscroller-studio2/
 
 ## Version
 
-v0.2.0.2026.0207
+v0.2.1.2026.0207

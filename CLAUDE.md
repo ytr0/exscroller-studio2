@@ -1,6 +1,6 @@
 # CLAUDE.md - ExScroller Game Studio 2
 
-## Version: v0.2.0.2026.0207
+## Version: v0.2.1.2026.0207
 
 ## プロジェクト概要
 サーマルプリンターゲーム用のビジュアル＋コードデュアルモードエディタ
@@ -78,6 +78,12 @@ npm run preview  # ビルド結果プレビュー
 ### ✅ 完了 (v0.2.0)
 - [x] ドキュメント整備: VISION, GAME_PATTERNS, ROADMAP, ARCHITECTURE
 
+### ✅ 完了 (v0.2.1)
+- [x] プリンター接続 (printer.js - ExScroller SDK連携)
+- [x] Connect/Disconnect/Test Print/Print UI
+- [x] Speed/Heat スライダー
+- [x] 接続状態表示
+
 ### ❌ 未実装
 - [ ] Transform handles（回転/リサイズハンドル）
 - [ ] Undo/Redo
@@ -85,7 +91,6 @@ npm run preview  # ビルド結果プレビュー
 - [ ] Monaco Editor統合
 - [ ] Flow View（ノードグラフ）
 - [ ] ゲームパターンテンプレート
-- [ ] プリンター接続
 - [ ] 画像インポート + ディザリング
 - [ ] スプライトエディタ
 - [ ] .pgpバイナリエクスポート
