@@ -1,10 +1,7 @@
 /**
  * PrinterConnection - ExScroller SDK integration
- * Version: 0.2.0.2026.0207
+ * Version: 0.2.1.2026.0207
  */
-
-// SDK URL (Cloudflare CDN)
-const SDK_URL = 'https://exscroller.yu20.workers.dev/sdk/exscroller.js';
 
 // Singleton state
 let SDK = null;
@@ -12,19 +9,26 @@ let printer = null;
 let connected = false;
 
 /**
- * Load ExScroller SDK from CDN
+ * Get ExScroller SDK (loaded via index.html)
  */
 export async function loadSDK() {
   if (SDK) return SDK;
 
-  try {
-    SDK = await import(SDK_URL);
-    console.log('[Printer] SDK loaded:', SDK);
-    return SDK;
-  } catch (err) {
-    console.error('[Printer] Failed to load SDK:', err);
-    throw new Error('Failed to load ExScroller SDK');
+  // Wait for SDK to be loaded globally
+  const maxWait = 5000;
+  const start = Date.now();
+
+  while (!window.ExScrollerSDK && Date.now() - start < maxWait) {
+    await new Promise(r => setTimeout(r, 100));
   }
+
+  if (!window.ExScrollerSDK) {
+    throw new Error('ExScroller SDK not loaded. Check network connection.');
+  }
+
+  SDK = window.ExScrollerSDK;
+  console.log('[Printer] SDK ready:', Object.keys(SDK));
+  return SDK;
 }
 
 /**

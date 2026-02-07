@@ -88,6 +88,13 @@
     </main>
   </div>
 
+  <!-- ExScroller SDK (loaded globally) -->
+  <script type="module">
+    // Import SDK and expose globally before main.js loads
+    import * as ExScrollerSDK from 'https://exscroller.yu20.workers.dev/sdk/exscroller.js';
+    window.ExScrollerSDK = ExScrollerSDK;
+    console.log('[Studio] SDK loaded:', Object.keys(ExScrollerSDK));
+  </script>
   <script type="module" src="/src/main.js"></script>
 </body>
 </html>
