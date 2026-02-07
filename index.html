@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ExScroller Game Studio 2</title>
+  <link rel="stylesheet" href="/src/styles.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header class="header">
+      <h1>ExScroller Studio 2</h1>
+      <div class="header-actions">
+        <button id="btnConnect">Connect</button>
+        <button id="btnPrint">Print</button>
+        <span id="status">Not connected</span>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+      <!-- Left: Toolbox -->
+      <aside class="toolbox">
+        <h3>Objects</h3>
+        <button class="tool-btn" data-tool="text">T Text</button>
+        <button class="tool-btn" data-tool="rect">▢ Rectangle</button>
+        <button class="tool-btn" data-tool="circle">○ Circle</button>
+        <button class="tool-btn" data-tool="line">╱ Line</button>
+        <button class="tool-btn" data-tool="image">▣ Image</button>
+        <button class="tool-btn" data-tool="sprite">◈ Sprite</button>
+
+        <h3>Sections</h3>
+        <div id="sectionList"></div>
+        <button id="btnAddSection">+ Add Section</button>
+      </aside>
+
+      <!-- Center: Canvas / Code -->
+      <div class="editor-area">
+        <div class="editor-tabs">
+          <button class="tab active" data-tab="visual">Visual</button>
+          <button class="tab" data-tab="code">Code</button>
+          <button class="tab" data-tab="split">Split</button>
+        </div>
+
+        <div class="editor-content">
+          <!-- Visual Editor -->
+          <div id="visualEditor" class="editor-pane">
+            <div id="canvasContainer">
+              <div id="receiptCanvas"></div>
+            </div>
+          </div>
+
+          <!-- Code Editor -->
+          <div id="codeEditor" class="editor-pane hidden">
+            <textarea id="codeArea" spellcheck="false"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Properties -->
+      <aside class="properties">
+        <h3>Properties</h3>
+        <div id="propPanel">
+          <p class="hint">Select an object to edit properties</p>
+        </div>
+
+        <h3>Preview</h3>
+        <div id="previewContainer">
+          <canvas id="previewCanvas" width="576" height="200"></canvas>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
